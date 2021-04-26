@@ -12,13 +12,9 @@
 #include "simAVRHeader.h"
 #endif
 
-int main(void) {
-    /* Insert DDR and PORT initializations */
-	DDRA = 0x00; PORTA = 0xFF;
-	DDRB = 0xFF; PORTB = 0x00;
-	unsigned char i;
-	unsigned char pattern[8] = {0x20, 0x30, 0x38, 0x1C, 0x0E, 0x07, 0x03, 0x01};
-    /* Insert your solution below */
+	unsigned char i = 1;
+	unsigned char pattern[9] = {0x20, 0x30, 0x38, 0x1C, 0x0E, 0x07, 0x03, 0x01, 0x20};
+
 enum SM_STATES { SM_Start, SM_Go, SM_Wait } SM_State;
 
 void Tick_LED() {
@@ -28,7 +24,7 @@ void Tick_LED() {
 		break;
 		
 		case SM_Wait:
-			if ((PINA & 0x01) != 0x01) {
+			if ((PINA & 0x01) == 0x00) {
 				SM_State = SM_Go;
 			}
 			else if ((PINA & 0x01) == 0x01) {
@@ -38,6 +34,7 @@ void Tick_LED() {
 
 		case SM_Go:
 			if ((PINA & 0x01) == 0x01) {
+				++i;
 				SM_State = SM_Wait;
 			}
 			else {
@@ -46,7 +43,7 @@ void Tick_LED() {
 		break;
 
 		default:
-		SM_State = SM_Wait;
+			SM_State = SM_Wait;
 		break;
 	}
 
@@ -57,8 +54,7 @@ void Tick_LED() {
 
 		case SM_Go:
 			PORTB = pattern[i];
-			i++;
-			if (i == 8) {
+			if (i == 9) {
 				i = 1;
 			}
 		break;
@@ -67,6 +63,11 @@ void Tick_LED() {
 		break;
 	}
 }
+int main(void) {
+    /* Insert DDR and PORT initializations */
+	DDRA = 0x00; PORTA = 0xFF;
+	DDRB = 0xFF; PORTB = 0x00;
+    /* Insert your solution below */
 	SM_State = SM_Start;
 	while (1) {
 		Tick_LED();
